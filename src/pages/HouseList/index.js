@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
 
-export default class News extends Component {
+export default class HouseList extends Component {
     render() {
         return (
             <div>
-                1
+                HomeList
             </div>
         )
     }
