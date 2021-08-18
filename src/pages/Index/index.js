@@ -38,6 +38,12 @@ const navs = [
   },
 ];
 
+// 获取地理位置信息
+// navigator.geolocation.getCurrentPosition(position => {
+//   console.log('当前位置信息：', position)
+// })
+
+
 export default class Index extends Component {
   state = {
     //轮播图状态数据
@@ -47,6 +53,8 @@ export default class Index extends Component {
     groups: [],
     // 最新资讯
     news: [],
+    // 当前城市名称
+    curCityName:'上海'
   };
 
   //获取轮播图数据的方法
@@ -85,6 +93,15 @@ export default class Index extends Component {
     this.getSwipers();
     this.getGroups();
     this.getNews();
+
+    // 通过ip定位获取到当前城市的名称
+    const curCity = new window.BMapGL.LocalCity();
+    curCity.get(async res=>{
+      const result = await axios.get(`http://localhost:8080/area/info?name=${res.name}`)
+      this.setState({
+        curCityName : result.data.body.label
+      })
+    })
   }
 
   //渲染轮播图
@@ -156,7 +173,7 @@ export default class Index extends Component {
                 className="location"
                 onClick={() => this.props.history.push("/citylist")}
               >
-                <span className="name">上海</span>
+                <span className="name">{this.state.curCityName}</span>
                 <i className="iconfont icon-arrow"></i>
               </div>
               {/* 搜索表单 */}

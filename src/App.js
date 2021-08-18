@@ -5,9 +5,7 @@ import {BrowserRouter as Router,Route,Link,Redirect} from 'react-router-dom'
 import Home from './pages/Home';
 import CityList from './pages/CityList';
 
-
-//导入要使用的组件
-import {Button} from 'antd-mobile'
+import Map from './pages/Map/index';
 
 function App() {
   return (
@@ -18,6 +16,7 @@ function App() {
       {/* 配置路由 */}
       <Route path="/home" component={Home}></Route>
       <Route path="/citylist" component={CityList}></Route>
+      <Route path="/map" component={Map}></Route>
 
     </div>
     </Router>
