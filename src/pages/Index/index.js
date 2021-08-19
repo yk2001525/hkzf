@@ -11,6 +11,7 @@ import Nav4 from "../../assets/images/nav-4.png";
 
 import "./index.scss";
 
+import {getCurrentCity} from '../../utils/index'
 const navs = [
   {
     id: 1,
@@ -89,19 +90,24 @@ export default class Index extends Component {
       news: res.data.body,
     });
   }
-  componentDidMount() {
+  async componentDidMount() {
     this.getSwipers();
     this.getGroups();
     this.getNews();
 
-    // 通过ip定位获取到当前城市的名称
-    const curCity = new window.BMapGL.LocalCity();
-    curCity.get(async res=>{
-      const result = await axios.get(`http://localhost:8080/area/info?name=${res.name}`)
-      this.setState({
-        curCityName : result.data.body.label
-      })
+    const curCity = await getCurrentCity()
+    this.setState({
+      curCityName:curCity.label
     })
+
+    // // 通过ip定位获取到当前城市的名称
+    // const curCity = new window.BMapGL.LocalCity();
+    // curCity.get(async res=>{
+    //   const result = await axios.get(`http://localhost:8080/area/info?name=${res.name}`)
+    //   this.setState({
+    //     curCityName : result.data.body.label
+    //   })
+    // })
   }
 
   //渲染轮播图
