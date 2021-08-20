@@ -2,7 +2,7 @@ import React, { Component } from "react";
 
 import axios from "axios";
 
-import { NavBar, Icon } from "antd-mobile";
+import { NavBar,Toast } from "antd-mobile";
 import "./index.scss";
 
 import { getCurrentCity } from "../../utils/index";
@@ -37,6 +37,7 @@ const formatCityData = (list) => {
 };
 const TITLE_HEIGHT = 36
 const NAME_HEIGHT = 50
+const HOUSE_CITY = ['北京','上海','广州','深圳']
 const formatCityIndex=(letter)=>{
     switch(letter){
         case '#':
@@ -48,14 +49,24 @@ const formatCityIndex=(letter)=>{
     }
 }
 export default class CityList extends Component {
-  state = {
-    cityList: {},
-    cityIndex: [],
-    activeIndex:0
-  };
+    constructor(props){
+        super(props)
 
-  componentDidMount() {
-    this.getCityList();
+        this.state = {
+            cityList: {},
+            cityIndex: [],
+            activeIndex:0
+          }
+        //创建Ref对象
+        this.cityListComponent = React.createRef()
+
+    }
+ 
+
+  async componentDidMount() {
+   await this.getCityList();
+    // 调用measureAllRows 提前计算List中每一行的高度，实现scrollToRow的精确跳转
+    this.cityListComponent.current.measureAllRows()
   }
 
   // 获取城市列表
@@ -78,6 +89,16 @@ export default class CityList extends Component {
       cityIndex,
     });
   }
+  changeCity({label,value}){
+      if(HOUSE_CITY.indexOf(label) > -1){
+          localStorage.setItem('hkzf_city',JSON.stringify({label,value}))
+          this.props.history.go(-1)
+          
+      }else{
+        Toast.info('该城市暂无房源数据',1,null,false)
+      }
+
+  }
 
   rowRenderer=({ 
     key, // Unique key within array of rows
@@ -95,7 +116,7 @@ export default class CityList extends Component {
         <div key={key} style={style} className="city">
             <div className="title">{formatCityIndex(letter)}</div>
            {
-               cityList[letter].map((item)=> <div className="name" key={item.value}>{item.label}</div>)
+               cityList[letter].map((item)=> <div className="name" key={item.value} onClick={()=>{this.changeCity(item)}}>{item.label}</div>)
            }
         </div>
      
@@ -112,9 +133,19 @@ export default class CityList extends Component {
 
   renderCityIndex(){
       const {activeIndex,cityIndex} = this.state
-      return cityIndex.map((item,index)=> <li key={item} className="city-index-item">
+      return cityIndex.map((item,index)=> <li onClick={()=>{
+          console.log(index)
+          this.cityListComponent.current.scrollToRow(index)
+      }} key={item} className="city-index-item">
       <span className={activeIndex === index? 'index-active':''}>{item === 'hot' ? '热':item.toUpperCase()}</span>
   </li>)
+  }
+  onRowsRendered=({startIndex})=>{
+    if(this.state.activeIndex !== startIndex){
+        this.setState({
+            activeIndex:startIndex
+        })
+    }
   }
 
   render() {
@@ -133,11 +164,15 @@ export default class CityList extends Component {
         <AutoSizer>
           {({ height, width }) => (
             <List
+              scrollToAlignment="start"
+              ref={this.cityListComponent}
               height={height}
               rowCount={this.state.cityIndex.length}
               rowHeight={this.getRowHeight}
               rowRenderer={this.rowRenderer}
               width={width}
+              onRowsRendered={this.onRowsRendered}
+              
             />
           )}
         </AutoSizer>
